@@ -18,13 +18,33 @@ jobs:
           node-version: "20"
 
       - name: Install dependencies
-        run: npm install --if-present
+        run: |
+          if [ -f package.json ]; then
+            npm install
+          else
+            echo "No package.json found, skipping"
+          fi
 
       - name: Lint
-        run: npm run lint --if-present || echo "No lint script, skipping"
+        run: |
+          if [ -f package.json ] && npm run lint --if-present 2>/dev/null; then
+            echo "Lint passed"
+          else
+            echo "No lint script or no package.json, skipping"
+          fi
 
       - name: Test
-        run: npm test --if-present || echo "No test script, skipping"
+        run: |
+          if [ -f package.json ] && grep -q '"test"' package.json; then
+            npm test
+          else
+            echo "No test script or no package.json, skipping"
+          fi
 
       - name: Build
-        run: npm run build --if-present || echo "No build script, skipping"
+        run: |
+          if [ -f package.json ] && grep -q '"build"' package.json; then
+            npm run build
+          else
+            echo "No build script or no package.json, skipping"
+          fi
